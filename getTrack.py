@@ -7,6 +7,7 @@ from scipy.spatial import ConvexHull
 from scipy import interpolate
 
 from globalVars import *
+from utils import *
 
 def random_points(min=MIN_POINTS, max=MAX_POINTS, margin=MARGIN, distance=MIN_DISTANCE):
     pointCount = rd.randrange(min, max+1, 1)
@@ -207,13 +208,15 @@ def draw_single_line(surface, color, init, end):
 
 def draw_track(surface, color, points, corners):
     radius = TRACK_WIDTH // 2
-    draw_corner_curbs(surface, corners, radius)
+    curbs = draw_corner_curbs(surface, corners, radius)
     chunk_dimensions = (radius * 2, radius * 2)
+    circles = []
     for point in points:
         blit_pos = (point[0] - radius, point[1] - radius)
         track_chunk = pygame.Surface(chunk_dimensions, pygame.SRCALPHA)
         pygame.draw.circle(track_chunk, color, (radius, radius), radius)
         surface.blit(track_chunk, blit_pos)
+        circles.append((track_chunk,blit_pos))
     starting_grid = draw_starting_grid(radius*2)
 
     offset = TRACK_ANGLE_OFFSET
@@ -224,6 +227,7 @@ def draw_track(surface, color, points, corners):
     rot_grid = pygame.transform.rotate(starting_grid, -angle)
     start_pos = (points[0][0] - math.copysign(1, n_vec_p[0])*n_vec_p[0] * radius, points[0][1] - math.copysign(1, n_vec_p[1])*n_vec_p[1] * radius)    
     surface.blit(rot_grid, start_pos)
+    return start_pos, circles, rot_grid, curbs
 
 def draw_starting_grid(track_width):
     tile_height = FINISH_LINE_HEIGHT
@@ -263,6 +267,7 @@ def draw_corner_curbs(track_surface, corners, track_width):
     offset = CURB_ANGLE_OFFSET
     correction_x = CURB_X_CORRECTION
     correction_y = CURB_Y_CORRECTION
+    curbs = []
     for corner in corners:
         temp_corner = corner + corner
         last_curb = None
@@ -289,6 +294,8 @@ def draw_corner_curbs(track_surface, corners, track_width):
                     continue
             last_curb = start_pos
             track_surface.blit(rot_curb, start_pos)
+            curbs.append((rot_curb, last_curb))
+    return curbs
 
 def draw_single_curb():
     tile_height = CURB_HEIGHT
@@ -297,58 +304,3 @@ def draw_single_curb():
     curb = pygame.Surface((tile_width, tile_height), pygame.SRCALPHA)
     curb.blit(curb_tile, (0, 0))
     return curb
-
-def main(debug=True, draw_checkpoints_in_track=True):
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    background_color = GRASS_GREEN
-    screen.fill(background_color)
-
-    points = random_points()
-    hull = ConvexHull(points)
-    track_points = make_track(get_points(hull, points))
-    corner_points = get_corners_with_curb(track_points)
-    f_points = smooth_track(track_points)
-
-    corners = get_full_corners(f_points, corner_points)
-    draw_track(screen, GREY, f_points, corners)
-
-    checkpoints = get_checkpoints(f_points)
-    if draw_checkpoints_in_track or debug:
-        for checkpoint in checkpoints:
-            draw_checkpoint(screen, f_points, checkpoint, debug)
-    if debug:
-        draw_points(screen, WHITE, points)
-        draw_convex_hull(hull, screen, points, RED)
-        draw_points(screen, BLUE, track_points)
-        draw_lines_from_points(screen, BLUE, track_points)    
-        draw_points(screen, BLACK, f_points)
-
-    pygame.display.set_caption(TITLE)
-    while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-        pygame.display.update()
-
-def str2bool(v):
-    if isinstance(v, bool):
-       return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Procedural racetrack generator")
-    parser.add_argument("--debug", type=str2bool, nargs='?',
-                        const=True, default=False,
-                        help="Show racetrack generation steps")
-    parser.add_argument("--show-checkpoints", type=str2bool, nargs='?',
-                        const=True, default=False,
-                        help="Show checkpoints")
-    args = parser.parse_args()
-    main(debug=args.debug, draw_checkpoints_in_track=args.show_checkpoints)
