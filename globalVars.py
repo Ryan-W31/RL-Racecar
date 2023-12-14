@@ -1,7 +1,8 @@
-WIDTH = 800 
-HEIGHT = 600
+WIDTH = 1000
+HEIGHT = 800
 
 TITLE = 'Race Track'
+FPS = 60
 
 FINISH_LINE = 'images/FinishLine.png'
 FINISH_LINE_HEIGHT = 10
