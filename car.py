@@ -37,13 +37,24 @@ class AbstractCar:
         self.y += vertical
         self.x += horizontal
 
-    def reduce_speed(self):
-        self.vel = max(self.vel - self.acceleration / 2, 0)
-        self.move()
+    def collide(self, mask, x=0, y=0):
+        car_mask = pygame.mask.from_surface(self.img)
+        offset = (int(self.x - x), int(self.y - y))
+        poi = mask.overlap(car_mask, offset)
+        print(poi)
+        return poi
 
 
 class PlayerCar(AbstractCar):
     IMG = RED_CAR
+
+    def reduce_speed(self):
+        self.vel = max(self.vel - self.acceleration / 2, 0)
+        self.move()
+
+    def bounce(self):
+        self.vel = -self.vel
+        self.move()
 
 
 def draw(win, start_pos, background, circles, curbs, finish_line, player_car):

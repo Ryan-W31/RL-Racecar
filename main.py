@@ -3,6 +3,21 @@ from globalVars import *
 from getTrack import *
 from car import *
 
+def move(player_car):
+    keys = pygame.key.get_pressed()
+    moved = False
+
+    if keys[pygame.K_a]:
+        player_car.rotate(left=True)
+    if keys[pygame.K_d]:
+        player_car.rotate(right=True)
+    if keys[pygame.K_w]:
+        moved = True
+        player_car.move_forward()
+
+    if not moved:
+        player_car.reduce_speed()
+
 def main(debug=True, draw_checkpoints_in_track=True):
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -32,6 +47,10 @@ def main(debug=True, draw_checkpoints_in_track=True):
         draw_lines_from_points(screen, BLUE, track_points)    
         draw_points(screen, BLACK, f_points)
 
+    mask_image = background.convert()
+    mask_image.set_colorkey(GREY)
+    mask = pygame.mask.from_surface(mask_image)
+
     clock = pygame.time.Clock()
     player_car = PlayerCar(4, 4, start_pos)
     running = True
@@ -41,25 +60,26 @@ def main(debug=True, draw_checkpoints_in_track=True):
 
         draw(screen, start_pos, background, circles, curbs, rot_grid, player_car)
 
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 break
 
-        keys = pygame.key.get_pressed()
-        moved = False
+        move(player_car)
+        
+        if player_car.collide(mask) == None:
+            player_car.bounce()
 
-        if keys[pygame.K_a]:
-            player_car.rotate(left=True)
-        if keys[pygame.K_d]:
-            player_car.rotate(right=True)
-        if keys[pygame.K_w]:
-            moved = True
-            player_car.move_forward()
+        finish_line_mask = pygame.mask.from_surface(rot_grid)
+        
 
-        if not moved:
-            player_car.reduce_speed()
+        # finish_poi_collide = player_car.collide(finish_line_mask, *start_pos)
+        # if finish_poi_collide != None:
+        #     if finish_poi_collide[1] == 0:
+        #         player_car.bounce()
+        #     else:
+        #         print("finish")
+
         
     pygame.quit()
 
