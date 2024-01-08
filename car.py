@@ -6,6 +6,7 @@ from globalVars import *
 
 RED_CAR = rescale(pygame.image.load("images/red_car.png"), 0.03)
 
+
 class AbstractCar:
     def __init__(self, max_vel, rotation_vel, pos):
         self.img = self.IMG
@@ -37,13 +38,6 @@ class AbstractCar:
         self.y += vertical
         self.x += horizontal
 
-    def collide(self, mask, x=0, y=0):
-        car_mask = pygame.mask.from_surface(self.img)
-        offset = (int(self.x - x), int(self.y - y))
-        poi = mask.overlap(car_mask, offset)
-        print(poi)
-        return poi
-
 
 class PlayerCar(AbstractCar):
     IMG = RED_CAR
@@ -57,15 +51,17 @@ class PlayerCar(AbstractCar):
         self.move()
 
 
-def draw(win, start_pos, background, circles, curbs, finish_line, player_car):
-
-    win.blit(background, (0,0))
+def draw(
+    win, start_pos, background, foreground, circles, curbs, finish_line, player_car
+):
+    win.blit(foreground, (0, 0))
+    win.blit(background, (0, 0))
 
     for circle in circles:
         win.blit(circle[0], circle[1])
     for curb in curbs:
         win.blit(curb[0], curb[1])
-    
+
     win.blit(finish_line, start_pos)
 
     player_car.draw(win)

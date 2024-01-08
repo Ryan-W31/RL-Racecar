@@ -1,14 +1,14 @@
 WIDTH = 1000
 HEIGHT = 800
 
-TITLE = 'Race Track'
+TITLE = "Race Track"
 FPS = 60
 
-FINISH_LINE = 'images/FinishLine.png'
+FINISH_LINE = "images/FinishLine.png"
 FINISH_LINE_HEIGHT = 10
 FINISH_LINE_WIDTH = 10
 
-CURB = 'images/curb.png'
+CURB = "images/curb.png"
 CURB_HEIGHT = 7
 CURB_WIDTH = 12
 
@@ -44,33 +44,33 @@ MAX_ANGLE = 90
 MIN_CURB_ANGLE = 20
 MAX_CURB_ANGLE = 90
 
-TRACK_WIDTH = 40
+TRACK_WIDTH = 60
 
 FULL_CORNER_NUM_POINTS = 17
 
 N_CHECKPOINTS = 10
 
 COOL_TRACK_SEEDS = [
-    911, 
-    639620465, 
-    666574559, 
-    689001243, 
-    608068482, 
-    1546, 
-    8, 
-    83, 
-    945, 
-    633, 
-    10, 
-    23, 
-    17, 
-    123, 
-    1217, 
-    12, 
-    5644, 
-    5562, 
-    2317, 
-    1964, 
-    95894, 
-    95521
+    911,
+    639620465,
+    666574559,
+    689001243,
+    608068482,
+    1546,
+    8,
+    83,
+    945,
+    633,
+    10,
+    23,
+    17,
+    123,
+    1217,
+    12,
+    5644,
+    5562,
+    2317,
+    1964,
+    95894,
+    95521,
 ]
