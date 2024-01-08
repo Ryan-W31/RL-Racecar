@@ -6,6 +6,7 @@ from globalVars import *
 
 RED_CAR = rescale(pygame.image.load("images/red_car.png"), 0.03)
 
+
 class AbstractCar:
     def __init__(self, max_vel, rotation_vel, pos):
         self.img = self.IMG
@@ -37,24 +38,30 @@ class AbstractCar:
         self.y += vertical
         self.x += horizontal
 
-    def reduce_speed(self):
-        self.vel = max(self.vel - self.acceleration / 2, 0)
-        self.move()
-
 
 class PlayerCar(AbstractCar):
     IMG = RED_CAR
 
+    def reduce_speed(self):
+        self.vel = max(self.vel - self.acceleration / 2, 0)
+        self.move()
 
-def draw(win, start_pos, background, circles, curbs, finish_line, player_car):
+    def bounce(self):
+        self.vel = -self.vel
+        self.move()
 
-    win.blit(background, (0,0))
+
+def draw(
+    win, start_pos, background, foreground, circles, curbs, finish_line, player_car
+):
+    win.blit(foreground, (0, 0))
+    win.blit(background, (0, 0))
 
     for circle in circles:
         win.blit(circle[0], circle[1])
     for curb in curbs:
         win.blit(curb[0], curb[1])
-    
+
     win.blit(finish_line, start_pos)
 
     player_car.draw(win)
