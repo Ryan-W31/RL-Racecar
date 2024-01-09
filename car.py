@@ -8,14 +8,16 @@ RED_CAR = rescale(pygame.image.load("images/red_car.png"), 0.03)
 
 
 class AbstractCar:
-    def __init__(self, max_vel, rotation_vel, pos):
+    def __init__(self, max_vel, rotation_vel, pos, angle, start_pos, start_angle):
         self.img = self.IMG
         self.max_vel = max_vel
         self.vel = 0
         self.rotation_vel = rotation_vel
-        self.angle = 0
+        self.angle = angle
         self.x, self.y = pos
         self.acceleration = 0.1
+        self.start_pos = start_pos
+        self.start_angle = start_angle
 
     def rotate(self, left=False, right=False):
         if left:
@@ -38,6 +40,11 @@ class AbstractCar:
         self.y += vertical
         self.x += horizontal
 
+    def reset(self):
+        self.x, self.y = self.start_pos
+        self.angle = self.start_angle
+        self.vel = 0
+
 
 class PlayerCar(AbstractCar):
     IMG = RED_CAR
@@ -52,7 +59,16 @@ class PlayerCar(AbstractCar):
 
 
 def draw(
-    win, start_pos, background, foreground, circles, curbs, finish_line, player_car
+    win,
+    start_pos,
+    background,
+    foreground,
+    circles,
+    curbs,
+    finish_line,
+    player_car,
+    checkpoint,
+    checkpoint_rect,
 ):
     win.blit(foreground, (0, 0))
     win.blit(background, (0, 0))
@@ -62,6 +78,7 @@ def draw(
     for curb in curbs:
         win.blit(curb[0], curb[1])
 
+    win.blit(checkpoint, checkpoint_rect)
     win.blit(finish_line, start_pos)
 
     player_car.draw(win)
