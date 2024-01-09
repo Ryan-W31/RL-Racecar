@@ -38,14 +38,13 @@ def main(debug=True, draw_checkpoints_in_track=True):
     corners = get_full_corners(f_points, corner_points)
 
     foreground = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    start_pos, circles, rot_grid, curbs = draw_track(
-        foreground, GREY, f_points, corners
-    )
+    start_pos, circles, rot_grid, angle, curbs = draw_track(foreground, GREY, f_points, corners)
 
-    checkpoints = get_checkpoints(f_points)
+    checkpoints_i = get_checkpoints(f_points)
+    checkpoints = []
     if draw_checkpoints_in_track or debug:
-        for checkpoint in checkpoints:
-            draw_checkpoint(screen, f_points, checkpoint, debug)
+        for checkpoint in checkpoints_i[1:]:
+            checkpoints.append(draw_checkpoint(foreground, f_points, checkpoint, debug))
     if debug:
         draw_points(screen, WHITE, points)
         draw_convex_hull(hull, screen, points, RED)
@@ -57,8 +56,27 @@ def main(debug=True, draw_checkpoints_in_track=True):
     mask = pygame.mask.from_surface(foreground)
 
     clock = pygame.time.Clock()
-    player_car = PlayerCar(4, 4, start_pos)
+
+    if -angle > 0:
+        car_start_angle = -angle
+    else:
+        car_start_angle = -angle + 360
+
+    car_start_pos = ()
+
+    if car_start_angle >= 0 and car_start_angle < 90:
+        car_start_pos = (start_pos[0], start_pos[1])
+    elif car_start_angle >= 90 and car_start_angle < 180:
+        car_start_pos = (start_pos[0], start_pos[1])
+    elif car_start_angle >= 180 and car_start_angle < 270:
+        car_start_pos = (start_pos[0] + 25, start_pos[1] + 30)
+    elif car_start_angle >= 270 and car_start_angle < 360:
+        car_start_pos = (start_pos[0] + 30, start_pos[1] - 25)
+
+    player_car = PlayerCar(4, 4, car_start_pos, car_start_angle, car_start_pos, car_start_angle)
     running = True
+
+    sequence = 1
 
     while running:
         clock.tick(FPS)
@@ -68,28 +86,50 @@ def main(debug=True, draw_checkpoints_in_track=True):
                 running = False
                 break
 
+        if sequence == (N_CHECKPOINTS - 1):
+            sequence = 0
+
+        checkpoint = draw_checkpoint(foreground, f_points, checkpoints_i[sequence], debug)
+
         move(player_car)
 
-        point = ((player_car.x + 10), (player_car.y + 20))
-        pos_in_mask1 = point[0] - rect.x, point[1] - rect.y
-        pos_in_mask2 = point[0] + rect.x, point[1] + rect.y
-        collide = (
-            rect.collidepoint(*point)
-            and mask.get_at(pos_in_mask1)
-            and mask.get_at(pos_in_mask2)
+        checkpoint_rect = checkpoint[0].get_rect(center=checkpoint[1])
+        checkpoint_mask = pygame.mask.from_surface(checkpoint[0])
+
+        point = ((player_car.x), (player_car.y))
+
+        pos_wall_mask1 = point[0] - rect.x, point[1] - rect.y
+        pos_wall_mask2 = point[0] + rect.x, point[1] + rect.y
+        wall_collide = rect.collidepoint(*point) and mask.get_at(pos_wall_mask1) and mask.get_at(pos_wall_mask2)
+
+        pos_checkpoint_mask1 = (
+            point[0] - checkpoint_rect.x,
+            point[1] - checkpoint_rect.y,
+        )
+        pos_checkpoint_mask2 = (
+            point[0] + checkpoint_rect.x,
+            point[1] + checkpoint_rect.y,
         )
 
-        if collide == 0:
-            player_car.bounce()
+        checkpoint_collide = (
+            checkpoint_rect.collidepoint(*point)
+            and checkpoint_mask.get_at(pos_checkpoint_mask1)
+            and checkpoint_mask.get_at(pos_checkpoint_mask2)
+        )
 
-        finish_line_mask = pygame.mask.from_surface(rot_grid)
+        checkpoint_collide = isinstance(checkpoint_collide, bool)
 
-        # finish_poi_collide = player_car.collide(finish_line_mask, *start_pos)
-        # if finish_poi_collide != None:
-        #     if finish_poi_collide[1] == 0:
-        #         player_car.bounce()
-        #     else:
-        #         print("finish")
+        print(checkpoint_collide)
+
+        if wall_collide == 0:
+            player_car.reset()
+            sequence = 1
+
+        if checkpoint_collide == False and sequence != 0:
+            sequence += 1
+        elif checkpoint_collide == False and sequence == 0:
+            print("complete!")
+            break
 
         draw(
             screen,
@@ -100,6 +140,8 @@ def main(debug=True, draw_checkpoints_in_track=True):
             curbs,
             rot_grid,
             player_car,
+            checkpoint[0],
+            checkpoint[1],
         )
 
     pygame.quit()

@@ -264,7 +264,7 @@ def draw_track(surface, color, points, corners):
         points[0][1] - math.copysign(1, n_vec_p[1]) * n_vec_p[1] * radius,
     )
     surface.blit(rot_grid, start_pos)
-    return start_pos, circles, rot_grid, curbs
+    return start_pos, circles, rot_grid, angle, curbs
 
 
 def draw_starting_grid(track_width):
@@ -292,7 +292,9 @@ def draw_checkpoint(track_surface, points, checkpoint, debug=False):
         vec_p[1] / math.hypot(vec_p[0], vec_p[1]),
     ]
     angle = math.degrees(math.atan2(n_vec_p[1], n_vec_p[0]))
-    checkpoint = draw_rectangle((radius * 2, 5), BLUE, line_thickness=1, fill=False)
+    checkpoint = draw_rectangle(
+        (radius * 2, 5), (0, 0, 255, 100), line_thickness=5, fill=True
+    )
     rot_checkpoint = pygame.transform.rotate(checkpoint, -angle)
     if debug:
         rot_checkpoint.fill(RED)
@@ -301,9 +303,10 @@ def draw_checkpoint(track_surface, points, checkpoint, debug=False):
         points[check_index][1] - math.copysign(1, n_vec_p[1]) * n_vec_p[1] * radius,
     )
     track_surface.blit(rot_checkpoint, check_pos)
+    return (rot_checkpoint, check_pos)
 
 
-def draw_rectangle(dimensions, color, line_thickness=1, fill=False):
+def draw_rectangle(dimensions, color, line_thickness=1, fill=True):
     filled = line_thickness
     if fill:
         filled = 0
