@@ -11,6 +11,7 @@ from utils import *
 
 
 def random_points(min=MIN_POINTS, max=MAX_POINTS, margin=MARGIN, distance=MIN_DISTANCE):
+    rd.seed(1217)
     pointCount = rd.randrange(min, max + 1, 1)
     points = []
 
@@ -39,21 +40,15 @@ def get_vector(dimensions):
     return [v / magnitude for v in vector]
 
 
-def make_track(
-    points, difficulty=DIFFICULTY, displacement=MAX_DISPLACEMENT, margin=MARGIN
-):
+def make_track(points, difficulty=DIFFICULTY, displacement=MAX_DISPLACEMENT, margin=MARGIN):
     pos = [[0, 0] for p in range(len(points) * 2)]
 
     for i in range(len(points)):
         disp = math.pow(rd.random(), difficulty) * displacement
         disp_list = [disp * i for i in get_vector(2)]
         pos[i * 2] = points[i]
-        pos[i * 2 + 1][0] = int(
-            (points[i][0] + points[(i + 1) % len(points)][0]) / 2 + disp_list[0]
-        )
-        pos[i * 2 + 1][1] = int(
-            (points[i][1] + points[(i + 1) % len(points)][1]) / 2 + disp_list[1]
-        )
+        pos[i * 2 + 1][0] = int((points[i][0] + points[(i + 1) % len(points)][0]) / 2 + disp_list[0])
+        pos[i * 2 + 1][1] = int((points[i][1] + points[(i + 1) % len(points)][1]) / 2 + disp_list[1])
 
     for i in range(3):
         pos = fix_angles(pos)
@@ -78,9 +73,7 @@ def push_points_apart(points, distance=DISTANCE_BETWEEN_POINTS):
     distance2 = distance * distance
     for i in range(len(points)):
         for j in range(i + 1, len(points)):
-            p_distance = math.sqrt(
-                (points[i][0] - points[j][0]) ** 2 + (points[i][1] - points[j][1]) ** 2
-            )
+            p_distance = math.sqrt((points[i][0] - points[j][0]) ** 2 + (points[i][1] - points[j][1]) ** 2)
             if p_distance < distance:
                 dx = points[j][0] - points[i][0]
                 dy = points[j][1] - points[i][1]
@@ -127,9 +120,7 @@ def fix_angles(points, max_angle=MAX_ANGLE):
     return points
 
 
-def get_corners_with_curb(
-    points, min_curb_angle=MIN_CURB_ANGLE, max_curb_angle=MAX_CURB_ANGLE
-):
+def get_corners_with_curb(points, min_curb_angle=MIN_CURB_ANGLE, max_curb_angle=MAX_CURB_ANGLE):
     require_curb = []
     for i in range(len(points)):
         if i > 0:
@@ -173,9 +164,7 @@ def get_full_corners(track_points, corners):
     for corner in corners_in_track:
         i = track_points.index(corner)
         tmp_track_points = track_points + track_points + track_points
-        f_corner = tmp_track_points[
-            i + len(track_points) - 1 - offset : i + len(track_points) - 1 + offset
-        ]
+        f_corner = tmp_track_points[i + len(track_points) - 1 - offset : i + len(track_points) - 1 + offset]
         f_corners.append(f_corner)
     return f_corners
 
@@ -211,13 +200,9 @@ def draw_points(surface, color, points):
 
 def draw_convex_hull(hull, surface, points, color):
     for i in range(len(hull.vertices) - 1):
-        draw_single_line(
-            surface, color, points[hull.vertices[i]], points[hull.vertices[i + 1]]
-        )
+        draw_single_line(surface, color, points[hull.vertices[i]], points[hull.vertices[i + 1]])
         if i == len(hull.vertices) - 2:
-            draw_single_line(
-                surface, color, points[hull.vertices[0]], points[hull.vertices[-1]]
-            )
+            draw_single_line(surface, color, points[hull.vertices[0]], points[hull.vertices[-1]])
 
 
 def draw_lines_from_points(surface, color, points):
@@ -292,9 +277,7 @@ def draw_checkpoint(track_surface, points, checkpoint, debug=False):
         vec_p[1] / math.hypot(vec_p[0], vec_p[1]),
     ]
     angle = math.degrees(math.atan2(n_vec_p[1], n_vec_p[0]))
-    checkpoint = draw_rectangle(
-        (radius * 2, 5), (0, 0, 255, 100), line_thickness=5, fill=True
-    )
+    checkpoint = draw_rectangle((radius * 3, 10), (0, 0, 255, 100), line_thickness=5, fill=True)
     rot_checkpoint = pygame.transform.rotate(checkpoint, -angle)
     if debug:
         rot_checkpoint.fill(RED)
@@ -355,10 +338,7 @@ def draw_corner_curbs(track_surface, corners, track_width):
             if last_curb is None:
                 last_curb = start_pos
             else:
-                if (
-                    math.hypot(start_pos[0] - last_curb[0], start_pos[1] - last_curb[1])
-                    >= track_width
-                ):
+                if math.hypot(start_pos[0] - last_curb[0], start_pos[1] - last_curb[1]) >= track_width:
                     continue
             last_curb = start_pos
             track_surface.blit(rot_curb, start_pos)
