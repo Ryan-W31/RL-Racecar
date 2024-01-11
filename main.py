@@ -32,7 +32,7 @@ def main():
         checkpoints_i,
     ) = build_track()
 
-    car = PlayerCar(4, car_start_pos_arr, car_start_angle, car_start_pos, car_start_angle)
+    car = PlayerCar(1, car_start_pos_arr, car_start_angle, car_start_pos, car_start_angle)
     value = True
     while value:
         car.reset()

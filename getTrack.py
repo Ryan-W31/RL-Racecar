@@ -7,7 +7,6 @@ from scipy.spatial import ConvexHull
 from scipy import interpolate
 
 from globalVars import *
-from utils import *
 
 
 def random_points(min=MIN_POINTS, max=MAX_POINTS, margin=MARGIN, distance=MIN_DISTANCE):
