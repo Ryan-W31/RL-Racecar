@@ -33,7 +33,7 @@ def build_track():
     if car_start_angle >= 0 and car_start_angle < 90:
         car_start_pos = (start_pos[0], start_pos[1])
     elif car_start_angle >= 90 and car_start_angle < 180:
-        car_start_pos = (start_pos[0], start_pos[1])
+        car_start_pos = (start_pos[0] + 25, start_pos[1] + 15)
     elif car_start_angle >= 180 and car_start_angle < 270:
         car_start_pos = (start_pos[0] + 25, start_pos[1] + 30)
     elif car_start_angle >= 270 and car_start_angle < 360:

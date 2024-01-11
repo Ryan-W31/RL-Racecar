@@ -10,7 +10,7 @@ from globalVars import *
 
 
 def random_points(min=MIN_POINTS, max=MAX_POINTS, margin=MARGIN, distance=MIN_DISTANCE):
-    rd.seed(COOL_TRACK_SEEDS[15])
+    rd.seed(COOL_TRACK_SEEDS[5])
     pointCount = rd.randrange(min, max + 1, 1)
     points = []
 
