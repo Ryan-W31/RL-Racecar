@@ -11,14 +11,12 @@ y = 40
 class PlayerCar:
     def __init__(self, rotation_speed, pos, angle, car_start_pos, car_start_angle):
         self.car = pygame.transform.scale(pygame.image.load("images/red_car.png"), (x, y))
-        self.rotated_car = self.car
-
         self.start_pos = car_start_pos
         self.start_angle = car_start_angle
         self.rotation_speed = rotation_speed
         self.pos = pos
         self.angle = angle
-        self.speed = 0
+        self.speed = 0.5
 
         self.center = [self.pos[0] + x / 2, self.pos[1] + y / 2]
 
@@ -34,8 +32,8 @@ class PlayerCar:
         rot_center(screen, self.car, self.pos, self.angle)
         self.draw_radar(screen)
 
-    def drawWithoutRadar(self, screen):
-        screen.blit(self.rotated_car, self.pos)
+    def draw_without_radar(self, screen):
+        rot_center(screen, self.car, self.pos, self.angle)
 
     def draw_radar(self, screen):
         for radar in self.radars:
@@ -86,24 +84,25 @@ class PlayerCar:
         dist = int(math.sqrt(math.pow(x_center - self.center[0], 2) + math.pow(y_center - self.center[1], 2)))
         self.radars.append([(x_center, y_center), dist])
 
-    def rotate(self, left=False, right=False):
+    def rotate(self, left=False, right=False, accelerate=False, decelerate=False):
         if left:
             self.angle += self.rotation_speed
         elif right:
             self.angle -= self.rotation_speed
+        elif accelerate:
+            self.speed += 0.5
+            self.speed = min(4, self.speed)
+        elif decelerate:
+            self.speed -= 0.5
+            self.speed = max(0.5, self.speed)
 
     def update(self, game_map):
-        self.speed = 2
         self.pos[1] += math.cos(math.radians(self.angle)) * self.speed
-        # self.pos[0] = max(self.pos[0], 20)
-        # self.pos[0] = min(self.pos[0], TRACK_WIDTH - 120)
 
-        # self.distance += self.speed
-        # self.time += 1
+        self.distance += self.speed
+        self.time += 1
 
         self.pos[0] += math.sin(math.radians(self.angle)) * self.speed
-        # self.pos[1] = max(self.pos[1], 20)
-        # self.pos[1] = min(self.pos[1], TRACK_WIDTH - 120)
 
         self.center = [int(self.pos[0]) + x / 2, int(self.pos[1]) + y / 2]
 
@@ -125,17 +124,15 @@ class PlayerCar:
             self.center[1] + math.sin(math.radians(360 - (self.angle + 330))) * length,
         ]
         self.corners = [left_top, right_top, left_bottom, right_bottom]
-
-        # print(f"Pos: {self.pos}\nCenter: {self.center}\nCorners: {self.corners}")
         self.check_collision(game_map)
         self.radars.clear()
 
-        for d in range(0, 360, 45):
+        for d in range(-180, 0, 45):
             self.check_radar(d, game_map)
 
     def get_data(self):
         radars = self.radars
-        return_values = [0, 0, 0, 0, 0, 0, 0, 0]
+        return_values = [0, 0, 0, 0, 0]
         for i, radar in enumerate(radars):
             return_values[i] = int(radar[1] / 30)
 
@@ -152,28 +149,6 @@ class PlayerCar:
         self.angle = self.start_angle
         self.speed = 0
         self.is_alive = True
-        # pygame.display.update()
-
-    # def collisionScreen(self, time):
-    #     self.pos = [500, 670]
-    #     self.is_alive = True
-    #     window.blit(track, (0, 0))
-    #     window.blit(finish, (600, 670))
-    #     window.blit(self.rotatedCarImage, self.pos)
-    #     pygame.draw.rect(window, (0,0,0), pygame.Rect(450, 150, 500, 500))
-    #     pygame.draw.rect(window, (0, 255, 0), pygame.Rect(450, 150, 500, 500), 2)
-    #     scoreLabel = ef.render("AI collided",1,(0,255,0))
-    #     window.blit(scoreLabel, (width - scoreLabel.get_width() - 510, 250))
-    #     scoreLabel = ef.render("Time elapsed:-",1,(0,255,0))
-    #     window.blit(scoreLabel, (width - scoreLabel.get_width() - 510, 350))
-    #     scoreLabel = ef.render(str("%.2f"%time),1,(0,255,0))
-    #     window.blit(scoreLabel, (width - scoreLabel.get_width() - 510, 450))
-    #     pygame.display.update()
-
-    # for event in pygame.event.get():
-    #     if event.type == pygame.KEYDOWN:
-    #         pygame.quit()
-    #         quit()
 
     def getPos(self):
         return self.pos
