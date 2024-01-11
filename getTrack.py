@@ -7,11 +7,10 @@ from scipy.spatial import ConvexHull
 from scipy import interpolate
 
 from globalVars import *
-from utils import *
 
 
 def random_points(min=MIN_POINTS, max=MAX_POINTS, margin=MARGIN, distance=MIN_DISTANCE):
-    rd.seed(COOL_TRACK_SEEDS[15])
+    rd.seed(COOL_TRACK_SEEDS[5])
     pointCount = rd.randrange(min, max + 1, 1)
     points = []
 
@@ -222,16 +221,14 @@ def draw_single_line(surface, color, init, end):
 
 def draw_track(surface, color, points, corners):
     radius = TRACK_WIDTH // 2
-    curbs = draw_corner_curbs(surface, corners, radius)
+    draw_corner_curbs(surface, corners, radius)
     chunk_dimensions = (radius * 2, radius * 2)
-    circles = []
 
     for point in points:
         blit_pos = (point[0] - radius, point[1] - radius)
         track_chunk = pygame.Surface(chunk_dimensions, pygame.SRCALPHA)
         pygame.draw.circle(track_chunk, color, (radius, radius), radius)
         surface.blit(track_chunk, blit_pos)
-        circles.append((track_chunk, blit_pos))
 
     starting_grid = draw_starting_grid(radius * 2)
 
@@ -249,7 +246,7 @@ def draw_track(surface, color, points, corners):
         points[0][1] - math.copysign(1, n_vec_p[1]) * n_vec_p[1] * radius,
     )
     surface.blit(rot_grid, start_pos)
-    return start_pos, circles, rot_grid, angle, curbs
+    return start_pos, angle
 
 
 def draw_starting_grid(track_width):
@@ -263,7 +260,7 @@ def draw_starting_grid(track_width):
     return starting_grid
 
 
-def draw_checkpoint(track_surface, points, checkpoint, debug=False):
+def draw_checkpoint(points, checkpoint):
     margin = CHECKPOINT_MARGIN
     radius = TRACK_WIDTH // 2 + margin
     offset = CHECKPOINT_ANGLE_OFFSET
@@ -279,13 +276,10 @@ def draw_checkpoint(track_surface, points, checkpoint, debug=False):
     angle = math.degrees(math.atan2(n_vec_p[1], n_vec_p[0]))
     checkpoint = draw_rectangle((radius * 3, 10), (0, 0, 255, 100), line_thickness=5, fill=True)
     rot_checkpoint = pygame.transform.rotate(checkpoint, -angle)
-    if debug:
-        rot_checkpoint.fill(RED)
     check_pos = (
         points[check_index][0] - math.copysign(1, n_vec_p[0]) * n_vec_p[0] * radius,
         points[check_index][1] - math.copysign(1, n_vec_p[1]) * n_vec_p[1] * radius,
     )
-    # track_surface.blit(rot_checkpoint, check_pos)
     return (rot_checkpoint, check_pos)
 
 
@@ -303,7 +297,6 @@ def draw_corner_curbs(track_surface, corners, track_width):
     offset = CURB_ANGLE_OFFSET
     correction_x = CURB_X_CORRECTION
     correction_y = CURB_Y_CORRECTION
-    curbs = []
     for corner in corners:
         temp_corner = corner + corner
         last_curb = None
@@ -342,8 +335,6 @@ def draw_corner_curbs(track_surface, corners, track_width):
                     continue
             last_curb = start_pos
             track_surface.blit(rot_curb, start_pos)
-            curbs.append((rot_curb, last_curb))
-    return curbs
 
 
 def draw_single_curb():

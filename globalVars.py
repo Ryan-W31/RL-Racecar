@@ -1,14 +1,16 @@
+import os
+
 WIDTH = 1000
 HEIGHT = 800
 
 TITLE = "Race Track"
-FPS = 60
+FPS = 30
 
-FINISH_LINE = "images/FinishLine.png"
+FINISH_LINE = os.path.join("assets", "FinishLine.png")
 FINISH_LINE_HEIGHT = 10
 FINISH_LINE_WIDTH = 10
 
-CURB = "images/curb.png"
+CURB = os.path.join("assets", "curb.png")
 CURB_HEIGHT = 7
 CURB_WIDTH = 12
 
