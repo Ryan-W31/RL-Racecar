@@ -23,8 +23,9 @@ Use reinforcement learning to find the fastest way around a track.
 - Open the terminal or GitHub Desktop and paste this command  ```https://github.com/Ryan-W31/RL-Racecar.git```
 - Once the repo has been cloned, enter into the main project directory from the terminal.
 - Create a virtual python envirnment using either Anaconda or virtualenv.
-...virtualenv: 1. ```pip install virtualenv``` 2.```venv {envirnoment name}```
-...Anaconda: 1. Install Anaconda 2.```conda create {envirnment name}```
+
+   virtualenv: 1. ```pip install virtualenv``` 2.```venv {envirnoment name}```  
+   Anaconda: 1. Install Anaconda 2.```conda create {envirnment name}```
 -  Using pip, download the required packages using the requirements.txt
 -  From the main project directory, paste this command in the terminal: ```python3 main.py```
 ...If you want to see the radars and checkpoints, use this command ```python3 main.py --debug```
