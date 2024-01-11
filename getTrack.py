@@ -11,7 +11,7 @@ from utils import *
 
 
 def random_points(min=MIN_POINTS, max=MAX_POINTS, margin=MARGIN, distance=MIN_DISTANCE):
-    rd.seed(1217)
+    rd.seed(COOL_TRACK_SEEDS[15])
     pointCount = rd.randrange(min, max + 1, 1)
     points = []
 
@@ -285,7 +285,7 @@ def draw_checkpoint(track_surface, points, checkpoint, debug=False):
         points[check_index][0] - math.copysign(1, n_vec_p[0]) * n_vec_p[0] * radius,
         points[check_index][1] - math.copysign(1, n_vec_p[1]) * n_vec_p[1] * radius,
     )
-    track_surface.blit(rot_checkpoint, check_pos)
+    # track_surface.blit(rot_checkpoint, check_pos)
     return (rot_checkpoint, check_pos)
 
 

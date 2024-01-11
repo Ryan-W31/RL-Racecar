@@ -23,17 +23,10 @@ def choose_move(q_table, current_state, epsilon, actions):
 
 
 def move(player_car, action):
-    moves = False
     if action == "left":
         player_car.rotate(left=True)
     elif action == "right":
         player_car.rotate(right=True)
-    elif action == "straight":
-        moves = True
-        player_car.move_forward()
-
-    if not moves:
-        player_car.reduce_speed()
 
 
 def update(q_table, current_state, next_state, action, reward, discount_factor, learning_rate):
@@ -54,7 +47,7 @@ def main(debug=True, draw_checkpoints_in_track=True):
     decay = 0.005
 
     actions = ["left", "right", "straight"]
-    num_states = 300
+    num_states = 50
 
     q_table = pd.DataFrame(index=range(num_states), columns=actions, dtype=float)
     q_table = q_table.fillna(0)
@@ -90,8 +83,8 @@ def main(debug=True, draw_checkpoints_in_track=True):
         draw_lines_from_points(screen, BLUE, track_points)
         draw_points(screen, BLACK, f_points)
 
-    rect = foreground.get_rect(center=(500, 400))
-    mask = pygame.mask.from_surface(foreground)
+    # rect = foreground.get_rect(center=(500, 400))
+    mask = foreground.convert_alpha()
 
     clock = pygame.time.Clock()
 
@@ -111,7 +104,9 @@ def main(debug=True, draw_checkpoints_in_track=True):
     elif car_start_angle >= 270 and car_start_angle < 360:
         car_start_pos = (start_pos[0] + 30, start_pos[1] - 25)
 
-    player_car = PlayerCar(4, 4, car_start_pos, car_start_angle, car_start_pos, car_start_angle)
+    car_start_pos_arr = [car_start_pos[0], car_start_pos[1]]
+    print(car_start_pos_arr)
+    player_car = PlayerCar(3, car_start_pos_arr, car_start_angle, car_start_pos, car_start_angle)
     running = True
 
     sequence = 1
@@ -120,83 +115,56 @@ def main(debug=True, draw_checkpoints_in_track=True):
 
     steps = 0
 
+    reward = 0
+
     while running:
         clock.tick(FPS)
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 break
 
-        reward = 1
+        screen.blit(background, (0, 0))
+        screen.blit(foreground, (0, 0))
+
         if sequence == (N_CHECKPOINTS - 1):
             sequence = 0
 
-        checkpoint = draw_checkpoint(foreground, f_points, checkpoints_i[sequence], debug)
+        checkpoint = draw_checkpoint(mask, f_points, checkpoints_i[sequence], debug)
+        checkpoint_rect = checkpoint[0].get_rect(center=checkpoint[1])
+        checkpoint_mask = pygame.mask.from_surface(checkpoint[0])
+
+        screen.blit(checkpoint[0], checkpoint[1])
+        # screen.blit(mask, (0, 0))
+        # print(mask.get_at((900, 200)))
 
         action = choose_move(q_table, sequence, epsilon, actions)
         steps += 1
         move(player_car, action)
 
-        checkpoint_rect = checkpoint[0].get_rect(center=checkpoint[1])
-        checkpoint_mask = pygame.mask.from_surface(checkpoint[0])
+        if player_car.check_alive():
+            reward += 1
+            player_car.update(mask)
 
-        point = ((player_car.x), (player_car.y))
+            if player_car.checkpoint_collision(mask, checkpoint_rect, checkpoint_mask):
+                reward += 5
+                sequence += 1
 
-        pos_wall_mask1 = point[0] - rect.x, point[1] - rect.y
-        pos_wall_mask2 = point[0] + rect.x, point[1] + rect.y
-        wall_collide = rect.collidepoint(*point) and mask.get_at(pos_wall_mask1) and mask.get_at(pos_wall_mask2)
-
-        pos_checkpoint_mask1 = (
-            point[0] - checkpoint_rect.x,
-            point[1] - checkpoint_rect.y,
-        )
-        pos_checkpoint_mask2 = (
-            point[0] + checkpoint_rect.x,
-            point[1] + checkpoint_rect.y,
-        )
-
-        checkpoint_collide = (
-            checkpoint_rect.collidepoint(*point)
-            and checkpoint_mask.get_at(pos_checkpoint_mask1)
-            and checkpoint_mask.get_at(pos_checkpoint_mask2)
-        )
-
-        checkpoint_collide = isinstance(checkpoint_collide, bool)
-
-        if wall_collide == 0:
+            player_car.draw(screen)
+        else:
             player_car.reset()
             sequence = 1
-            steps = 0
-            episode += 1
             reward -= 20
-            print(f"Epsiode {episode}")
-
-            epsilon = epsilon * 0.999
-            epsilon = max(0.01, epsilon)
-
+            print("Episode: ", episode, "Reward: ", reward)
+            episode += 1
             time.sleep(0.5)
-        elif checkpoint_collide == False and sequence != 0:
-            reward += 5
-            sequence += 1
-        elif checkpoint_collide == False and sequence == 0:
-            print("complete!")
-            break
+
+            epsilon = epsilon * decay
+            epsilon = max(epsilon, 0.1)
+            reward = 0
 
         q_table = update(q_table, sequence, sequence + 1, action, reward, discount_factor, learning_rate)
-
-        draw(
-            screen,
-            start_pos,
-            background,
-            foreground,
-            circles,
-            curbs,
-            rot_grid,
-            player_car,
-            checkpoint[0],
-            checkpoint[1],
-        )
+        pygame.display.update()
 
     print(f"Finished on Epsiode {episode} with {steps} Steps")
     print(q_table)
